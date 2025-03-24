@@ -1,58 +1,96 @@
-# revachol-bot-final-cut
+# Revachol Bot: Final Cut
 
-A simple chat backend using Express and OpenAI SDK.
+Welcome to **Revachol Bot: Final Cut**, a fan-made chat backend inspired by the world of _Disco Elysium_.
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- [Yarn](https://yarnpkg.com/) (or npm)
-- An OpenAI API key
+This projects uses OpenAI SDK, so you need a compatible provider (openAI, gemini, etc) and API Key to continue.
 
-## Env
+---
 
-Environment variables are managed using two files located in the `env` folder:
+## Setting Up the Environment
 
-1. `env/development.env`: Contains non-sensitive configuration variables.
+1. Install dependencies:
 
-   ```
-   API_BASE_URL=your_base_url_here (e.g. https://generativelanguage.googleapis.com/v1beta/)
-   PORT=3000
+   ```bash
+   yarn
    ```
 
-2. `env/development-secrets.env`: Contains sensitive configuration variables (e.g., API keys).
+2. Create the `env/development-secrets.env` file if it doesn't exist:
+
+   ```bash
+   touch env/development-secrets.env
    ```
+
+3. Populate it with your sensitive variables:
+
+   ```env
    OPENAI_API_KEY=your_openai_api_key_here
    ```
 
-### Setting Up the Environment
+4. (Optional) Update `env/development.env` with non-sensitive configuration:
+   ```env
+   API_BASE_URL=https://generativelanguage.googleapis.com/v1beta/
+   PORT=3000
+   ```
 
-1. Create the `env/development-secrets.env` file if it doesn't exist.
-2. Populate it with your sensitive variables, such as `OPENAI_API_KEY`.
+---
 
 ## Quickstart
 
-- `yarn`
-- `yarn dev`
-- available at http://localhost:3000
+1. Start the development server:
+
+   ```bash
+   yarn dev
+   ```
+
+2. Open your browser and visit:
+
+   ```
+   http://localhost:3000
+   ```
+
+3. Use the following endpoints to interact with the bot:
+
+   - **Health Check**:  
+     **GET** `/health`  
+     Returns `200 OK` with the message `Okay!`
+
+   - **Chat Completions**:  
+     **POST** `/chat/completions`  
+     **Body**:
+
+     ```json
+     {
+       "prompt": "Your prompt here",
+       "character": "harryDuBois"
+     }
+     ```
+
+   - **Streamed Chat Completions**:  
+     **POST** `/chat/completions/stream`  
+     Same body as above, but responses are streamed.
+
+---
+
+## Characters
+
+Each character has been carefully crafted to reflect their unique personalities from _Disco Elysium_. Here's a quick overview:
+
+- **Harry Du Bois**: Chaotic, poetic, and deeply unstable. Expect existential despair and surreal metaphors.
+- **Kim Kitsuragi**: Logical, disciplined, and dryly humorous. The voice of reason in a sea of madness.
+- **Cuno**: Loud, profane, and unpredictable. Chaos incarnate.
+- **Evrart Claire**: Smooth, manipulative, and always in control. A master of subtle pressure.
+- **Joyce Messier**: Pragmatic, efficient, and tinged with dry humor. No-nonsense, but not heartless.
+
+---
 
 ## Tests
 
-- `yarn test`
+Run the test suite to ensure everything is working as expected:
 
-## Endpoints
+```bash
+yarn test
+```
 
-### Health Check
-
-- **GET** `/health`
-  - Returns `200 OK` with the message `Okay!`
-
-### Chat Completions
-
-- **POST** `/chat/completions`
-  - **Body**:
-    ```json
-    {
-      "prompt": "Your prompt here",
-      "character": "harryDuBois"
-    }
-    ```
+---
