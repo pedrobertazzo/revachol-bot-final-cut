@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { runCompletion } from './index';
+import { runCompletion, runCompletionStream } from './index';
 import { openai } from '../client/openai';
 
 jest.mock('../client/openai', () => ({
@@ -20,9 +20,8 @@ describe('runCompletion', () => {
   beforeEach(() => {
     mockRequest = {
       body: {
-        prompt: 'Hello, world!',
-        model: 'test-model',
-        temperature: 0.7,
+        prompt: 'Hello world!',
+        character: 'cuno',
       },
     };
 
@@ -37,7 +36,7 @@ describe('runCompletion', () => {
     mockNext = jest.fn();
   });
 
-  it('should stream a valid response when the completion API succeeds', async () => {
+  it('should stream a valid response when the completion stream API succeeds', async () => {
     const mockStream = async function* () {
       yield { choices: [{ delta: { content: 'Hello' } }] };
       yield { choices: [{ delta: { content: ', world!' } }] };
@@ -45,16 +44,31 @@ describe('runCompletion', () => {
 
     (openai.chat.completions.create as jest.Mock).mockResolvedValue(mockStream());
 
-    await runCompletion(mockRequest as Request, mockResponse as Response, mockNext);
+    await runCompletionStream(mockRequest as Request, mockResponse as Response, mockNext);
 
-    expect(mockResponse.write).toHaveBeenCalledWith(
-      `data: ${JSON.stringify({ text: 'Hello' })}\n\n`
-    );
-    expect(mockResponse.write).toHaveBeenCalledWith(
-      `data: ${JSON.stringify({ text: ', world!' })}\n\n`
-    );
+    expect(mockResponse.write).toHaveBeenCalledWith({ character: 'cuno', text: 'Hello' });
+    expect(mockResponse.write).toHaveBeenCalledWith({ character: 'cuno', text: ', world!' });
     expect(mockResponse.write).toHaveBeenCalledWith('data: [DONE]\n\n');
     expect(mockResponse.end).toHaveBeenCalled();
+  });
+
+  it('should return a valid response when the completion API succeeds', async () => {
+    const mockedResponse = {
+      choices: [
+        {
+          message: {
+            content: 'Hello world!',
+          },
+        },
+      ],
+    };
+
+    (openai.chat.completions.create as jest.Mock).mockResolvedValue(mockedResponse);
+
+    await runCompletion(mockRequest as Request, mockResponse as Response, mockNext);
+
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({ character: 'cuno', text: 'Hello world!' });
   });
 
   it('should handle errors and forward exception', async () => {
@@ -73,8 +87,7 @@ describe('runCompletion', () => {
       {
         body: {
           prompt: '',
-          model: 'test-model',
-          temperature: 0.7,
+          character: 'cuno',
         },
       } as Request,
       mockResponse as Response,
@@ -86,6 +99,25 @@ describe('runCompletion', () => {
       error: 'Bad Request',
       message: "Missing required 'prompt' parameter",
     });
-    expect(mockResponse.end).toHaveBeenCalled();
+  });
+
+  it('should return an error if character is incorrect', async () => {
+    await runCompletion(
+      {
+        body: {
+          prompt: 'Hello world!',
+          character: 'someoneElse',
+        },
+      } as Request,
+      mockResponse as Response,
+      mockNext
+    );
+
+    expect(mockResponse.status).toHaveBeenCalledWith(400);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      error: 'Bad Request',
+      message:
+        "Invalid value for parameter 'character', needs to match one of the possible values: harryDuBois, kimKitsuragi, cuno, evrartClaire, joyceMessier",
+    });
   });
 });

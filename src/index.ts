@@ -18,7 +18,7 @@ const startServer = async () => {
   });
 
   app.post('/chat/completions', runCompletion);
-  app.post('/chat/completions', runCompletionStream);
+  app.post('/chat/completions/stream', runCompletionStream);
 
   httpServer.listen({ port });
   console.log(`🚀 Server ready at http://localhost:${port}/ 🚀`);

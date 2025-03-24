@@ -4,14 +4,13 @@ import { ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from
 
 import { envVars } from '../utilities/env-vars';
 import { characters } from '../instructions/character-instructions';
+import { CompletionsRequest } from './types';
 
 const model = envVars.API_MODEL;
 const temperature = 1.5;
 
-const isRequestValid = (req: Request, res: Response): boolean => {
-  const prompt = req.body.prompt;
-  const character = req.body.character;
-
+const isRequestValid = (params: CompletionsRequest, res: Response): boolean => {
+  const { prompt, character } = params;
   if (!prompt) {
     res.status(400).json({
       error: 'Bad Request',
@@ -42,15 +41,16 @@ export const runCompletionStream = async (req: Request, res: Response, _next: Ne
     const prompt = req.body.prompt;
     const character = req.body.character;
 
-    if (!isRequestValid(req, res)) {
+    if (!isRequestValid({ prompt, character }, res)) {
+      console.log('Invalid request');
       return;
     }
 
     const characterInstructions = characters[character]!;
 
     const messages = [
-      { role: 'user', content: prompt } as ChatCompletionUserMessageParam,
-      { role: 'system', content: characterInstructions } as ChatCompletionSystemMessageParam,
+      { role: 'user', content: prompt } satisfies ChatCompletionUserMessageParam,
+      { role: 'system', content: characterInstructions } satisfies ChatCompletionSystemMessageParam,
     ];
 
     const stream = await openai.chat.completions.create({
@@ -64,7 +64,7 @@ export const runCompletionStream = async (req: Request, res: Response, _next: Ne
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || '';
       if (content) {
-        res.status(200).write(`data: ${JSON.stringify({ text: content })}\n\n`);
+        res.status(200).write({ character, text: content });
       }
     }
 
@@ -82,15 +82,15 @@ export const runCompletion = async (req: Request, res: Response, _next: NextFunc
     const prompt = req.body.prompt;
     const character = req.body.character;
 
-    if (!isRequestValid(req, res)) {
+    if (!isRequestValid({ prompt, character }, res)) {
       return;
     }
 
     const characterInstructions = characters[character]!;
 
     const messages = [
-      { role: 'user', content: prompt } as ChatCompletionUserMessageParam,
-      { role: 'system', content: characterInstructions } as ChatCompletionSystemMessageParam,
+      { role: 'user', content: prompt } satisfies ChatCompletionUserMessageParam,
+      { role: 'system', content: characterInstructions } satisfies ChatCompletionSystemMessageParam,
     ];
 
     const response = await openai.chat.completions.create({
@@ -99,12 +99,11 @@ export const runCompletion = async (req: Request, res: Response, _next: NextFunc
       messages: messages,
     });
 
-    console.log('response:', response);
+    const message = response.choices[0]?.message?.content || '';
 
-    res.status(200).json({ text: response });
+    res.status(200).json({ character, text: message });
   } catch (error) {
     console.error('Error while executing runCompletion:', error);
     res.status(500).json({ error: (error as Error).message });
-    res.end();
   }
 };
