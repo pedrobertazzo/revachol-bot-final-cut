@@ -87,10 +87,7 @@ Each character has been carefully crafted to reflect their unique personalities 
 
 ## Tests
 
-Run the test suite to ensure everything is working as expected:
-
 ```bash
 yarn test
 ```
-
 ---
