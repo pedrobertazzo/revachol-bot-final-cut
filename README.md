@@ -1,10 +1,10 @@
 # Revachol Bot: Final Cut
 
-Welcome to **Revachol Bot: Final Cut**, a fan-made chat backend inspired by the world of _Disco Elysium_.
+**Revachol Bot: Final Cut** is a fan-made chat backend inspired by the world of _Disco Elysium_.
 
 ## Prerequisites
 
-This projects uses OpenAI SDK, so you need a compatible provider (openAI, gemini, etc) and API Key to continue.
+This projects uses OpenAI SDK, so you need a compatible provider (openai, gemini, etc) and API Key to run it.
 
 ---
 
