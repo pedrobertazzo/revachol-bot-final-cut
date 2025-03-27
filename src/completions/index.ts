@@ -4,7 +4,7 @@ import { ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from
 
 import { envVars } from '../utilities/env-vars';
 import { characters } from '../instructions/character-instructions';
-import { CompletionsRequest } from './types';
+import type { CompletionsRequest } from './types';
 
 const model = envVars.API_MODEL;
 const temperature = 1.5;
